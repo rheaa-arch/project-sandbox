@@ -12,3 +12,29 @@ order by first_name asc;
 -- Show patient_id and first_name from patients where their first_name start and ends with 's' and is at least 6 characters long.
 SELECT patient_id, first_name from patients
 where first_name like 's%s' and len(first_name) >= 6;
+
+-- Show patient_id, first_name, last_name from patients whos diagnosis is 'Dementia'. Primary diagnosis is stored in the admissions table.
+SELECT p.patient_id, first_name, last_name FROM patients p
+left join admissions a
+on p.patient_id = a.patient_id
+where diagnosis = 'Dementia';
+
+-- Display every patient's first_name. Order the list by the length of each name and then by alphabetically.
+select first_name from patients
+order by len(first_name),first_name asc;
+
+-- Show the total amount of male patients and the total amount of female patients in the patients table.Display the two results in the same row.
+select 
+	(select count(gender) from patients where gender = 'M') as male_count,
+    (select count(gender) from patients where gender = 'F') as female_count;
+
+-- Show first and last name, allergies from patients which have allergies to either 'Penicillin' or 'Morphine'. Show results ordered ascending by allergies then by first_name then by last_name.
+select first_name, last_name, allergies from patients
+where allergies = 'Penicillin' or allergies =  'Morphine'
+order by allergies, first_name, last_name asc;
+
+-- Show patient_id, diagnosis from admissions. Find patients admitted multiple times for the same diagnosis.
+select patient_id, diagnosis from admissions
+group by patient_id,
+		 diagnosis
+having count(*) > 1
