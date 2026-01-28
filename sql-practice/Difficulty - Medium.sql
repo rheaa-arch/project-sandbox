@@ -152,3 +152,76 @@ right join patients p
 on pn.province_id = p.province_id
 group by pn.province_name
 order by patient_count desc;
+
+-- For every admission, display the patient's full name, their admission diagnosis, and their doctor's full name who diagnosed their problem.
+SELECT 
+	concat(p.first_name, ' ', p.last_name) as patient_name,
+    a.diagnosis,
+    concat(d.first_name, ' ', d.last_name) as doctor_name
+FROM patients p
+left join admissions a
+on p.patient_id = a.patient_id
+right join doctors d
+on a.attending_doctor_id = d.doctor_id;
+
+-- display the first name, last name and number of duplicate patients based on their first name and last name.Ex: A patient with an identical name can be considered a duplicate.
+select 
+	first_name,
+    last_name,
+    count(*) as num_of_duplicates
+from patients
+group by first_name, last_name
+having count(*) > 1 
+
+-- Display patient's full name, height in the units feet rounded to 1 decimal, weight in the unit pounds rounded to 0 decimals, birth_date, gender non abbreviated.
+-- Convert CM to feet by dividing by 30.48.
+-- Convert KG to pounds by multiplying by 2.205.
+select
+	concat(first_name, ' ', last_name) as patient_name,
+    round(height /30.48, 1) as [height "Feet"],
+    round(weight * 2.205) as [weight "Pounds"],
+    birth_date,
+CASE
+      WHEN gender = 'M' THEN 'MALE'
+      ELSE 'FEMALE'
+  END as gender_type
+from patients;
+
+-- Show patient_id, first_name, last_name from patients whose does not have any records in the admissions table. (Their patient_id does not exist in any admissions.patient_id rows.)
+select 
+	p.patient_id,
+    p.first_name,
+    p.last_name
+from patients p
+left join admissions a
+on p.patient_id = a.patient_id
+where admission_date is null;
+
+-- Display a single row with max_visits, min_visits, average_visits where the maximum, minimum and average number of admissions per day is calculated. Average is rounded to 2 decimal places.
+select
+	max(number_of_visit) as max_visit,
+    min(number_of_visit) as min_visit,
+    round(avg(number_of_visit),2) as avg_visit
+from (
+  select 
+  	admission_date, 
+  	count(admission_date) as number_of_visit
+  from admissions
+group by admission_date
+);
+
+-- Display every patient that has at least one admission and show their most recent admission along with the patient and doctor's full name.
+select
+	concat(p.first_name, ' ', p.last_name) as patient_name,
+    admission_date,
+    concat(d.first_name,' ',d.last_name) as doctor_name
+from patients p
+left join admissions a
+on p.patient_id = a.patient_id
+right join doctors d
+on a.attending_doctor_id = d.doctor_id
+where a.admission_date =
+	(select max(a2.admission_date)
+     from admissions a2
+     where a2.patient_id = p.patient_id
+     );
