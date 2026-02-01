@@ -29,3 +29,29 @@ from patients;
 -- Show patient_id, first_name, last_name, and attending doctor's specialty.
 -- Show only the patients who has a diagnosis as 'Epilepsy' and the doctor's first name is 'Lisa'
 -- Check patients, admissions, and doctors tables for required information.
+SELECT 
+	p.patient_id,
+    p.first_name,
+    p.last_name,
+    d.specialty as attending_doctor_specialty
+FROM patients p
+left join admissions a
+on p.patient_id = a.patient_id
+right join doctors d
+on a.attending_doctor_id = d.doctor_id
+where a.diagnosis = 'Epilepsy' and d.first_name = 'Lisa';
+
+-- All patients who have gone through admissions, can see their medical documents on our site. Those patients are given a temporary password after their first admission. Show the patient_id and temp_password.
+-- The password must be the following, in order:
+-- 1. patient_id
+-- 2. the numerical length of patient's last_name
+-- 3. year of patient's birth_date
+select distinct
+	p.patient_id,
+    concat(a.patient_id,len(p.last_name),year(p.birth_date)) as temp_password
+from patients p
+right join admissions a
+on p.patient_id = a.patient_id;
+
+-- Each admission costs $50 for patients without insurance, and $10 for patients with insurance. All patients with an even patient_id have insurance.
+-- Give each patient a 'Yes' if they have insurance, and a 'No' if they don't have insurance. Add up the admission_total cost for each has_insurance group.
