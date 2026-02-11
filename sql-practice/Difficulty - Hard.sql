@@ -66,3 +66,47 @@ from
 group by has_insurance;
 
 -- Show the provinces that has more patients identified as 'M' than 'F'. Must only show full province_name
+select province_name
+from province_names
+where province_id in ( 
+    select province_id 
+  	from patients 
+  	group by province_id
+  	having count(case when gender = 'M' then 1 end) > count( case when gender = 'F' then 1 end)
+ );
+
+-- We are looking for a specific patient. Pull all columns for the patient who matches the following criteria:
+-- First_name contains an 'r' after the first two letters.
+-- Identifies their gender as 'F'
+-- Born in February, May, or December
+-- Their weight would be between 60kg and 80kg
+-- Their patient_id is an odd number
+-- They are from the city 'Kingston'
+select
+	patient_id,
+    first_name,
+    last_name,
+    gender,
+	birth_date,
+    city,
+    province_id,
+    allergies,
+    height,
+    weight
+from patients
+where first_name like '%r%' 
+	and gender = 'F' 
+    and month(birth_date) in (2, 5, 12)  
+    and weight between 60 and 80
+    and patient_id % 2 = 1
+    and city = 'Kingston';
+
+-- Show the percent of patients that have 'M' as their gender. Round the answer to the nearest hundreth number and in percent form.
+select 
+	concat (
+    round(
+        (sum(case when gender = 'M' then 1 else 0 end)* 100.0) / count(gender), 2), '%') 
+        as percent_of_male_patients
+from patients;
+
+-- 
