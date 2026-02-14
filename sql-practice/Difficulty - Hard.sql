@@ -109,4 +109,34 @@ select
         as percent_of_male_patients
 from patients;
 
--- 
+-- For each day display the total amount of admissions on that day. Display the amount changed from the previous date.
+select 
+	admission_date,
+    admission_day,
+    admission_day - lag(admission_day, 1) over(order by admission_date) as admission_count_change
+from (select date(admission_date) as admission_date,
+      count(*) as admission_day
+      from admissions
+      group by date(admission_date)) admissions
+order by admission_date
+
+-- Sort the province names in ascending order in such a way that the province 'Ontario' is always on top.
+select province_name from province_names
+order by (
+    case 
+    	when province_name = 'Ontario' then 0
+        else 1
+    end )
+
+-- We need a breakdown for the total amount of admissions each doctor has started each year. Show the doctor_id, doctor_full_name, specialty, year, total_admissions for that year.
+select 
+	doctor_id,
+    concat(first_name,' ', last_name) as doctor_name,
+    specialty,
+    year(admission_date) as year,
+    count(admission_date) as total_admission
+from doctors 
+left join admissions
+on doctors.doctor_id = admissions.attending_doctor_id
+group by 1,2,3,4
+
